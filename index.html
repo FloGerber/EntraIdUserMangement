@@ -8,9 +8,7 @@
 
     <!-- Fluent Dark palette + base styles -->
     <style>
-        /* ===========================
-       Fluent Dark — color tokens
-       =========================== */
+        /* (your CSS unchanged) */
         :root {
             --bg: #1E1E1E;
             --surface: #252526;
@@ -32,7 +30,6 @@
             --ui-font: "Segoe UI", Roboto, system-ui, -apple-system, "Helvetica Neue", Arial;
         }
 
-        /* Page base */
         html,
         body {
             height: 100%;
@@ -49,7 +46,6 @@
             box-sizing: border-box;
         }
 
-        /* Utility */
         .visually-hidden {
             position: absolute !important;
             height: 1px;
@@ -104,7 +100,6 @@
             color: var(--text-secondary);
         }
 
-        /* Toolbar / Search */
         .app-header {
             display: flex;
             flex-direction: column;
@@ -124,7 +119,6 @@
             border: 1px solid var(--divider);
         }
 
-        /* Full width search (confirmed) */
         .search-full {
             flex: 1;
             display: flex;
@@ -151,7 +145,6 @@
             font-size: 13px;
         }
 
-        /* Toolbar right group */
         .toolbar-right {
             display: flex;
             gap: 8px;
@@ -159,7 +152,6 @@
             margin-left: auto;
         }
 
-        /* Main layout */
         .layout {
             display: grid;
             grid-template-columns: 1fr;
@@ -168,14 +160,12 @@
             margin: 18px auto 0;
         }
 
-        /* On large screens make two columns: left content + right small panel (if needed) */
         @media(min-width:1200px) {
             .layout {
                 grid-template-columns: 1fr 360px;
             }
         }
 
-        /* Card surface */
         .card {
             background: var(--panel);
             border-radius: 12px;
@@ -184,7 +174,6 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
         }
 
-        /* Table */
         .table-wrap {
             overflow: auto;
             border-radius: 10px;
@@ -249,7 +238,6 @@
             font-size: 13px;
         }
 
-        /* Badges */
         .badge {
             display: inline-flex;
             padding: 6px 8px;
@@ -272,7 +260,6 @@
             border: 1px solid rgba(164, 38, 44, 0.16);
         }
 
-        /* Filter chips */
         .chips {
             display: flex;
             gap: 8px;
@@ -292,7 +279,6 @@
             gap: 8px;
         }
 
-        /* Column panel (drawer) */
         .drawer {
             position: fixed;
             right: -420px;
@@ -334,7 +320,6 @@
             color: var(--text);
         }
 
-        /* Detail drawer (slide-in) */
         .detail-drawer {
             position: fixed;
             right: -720px;
@@ -399,7 +384,6 @@
             color: var(--text);
         }
 
-        /* Small helpers */
         .muted-btn {
             background: transparent;
             border: 1px solid var(--divider);
@@ -420,7 +404,6 @@
             border-radius: 2px;
         }
 
-        /* Animations */
         .fade-in {
             animation: fadeUp .18s ease both;
         }
@@ -440,7 +423,6 @@
 
     <!-- Icons (inline SVG used later in JS or markup) -->
     <script>
-        /* small helper to create inline SVG icons in JS (used in next chunk) */
         function svg(name) {
             const icons = {
                 search: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zm8.707 15.293-3.853-3.853" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
@@ -453,14 +435,11 @@
         }
     </script>
 
-    <!-- external libs loaded in final JS chunk: msal + sortable (kept out of head execution) -->
 </head>
 
 <body>
 
-    <!-- ================================
-       HEADER + FULL-WIDTH SEARCH BAR
-       ================================ -->
+    <!-- HEADER + FULL-WIDTH SEARCH BAR -->
     <div class="app-header fade-in">
 
         <div class="toolbar">
@@ -468,17 +447,16 @@
             <!-- FULL WIDTH SEARCH -->
             <div class="search-full">
                 <span style="color:var(--text-secondary);display:flex;align-items:center;">
-                    <!-- search icon -->
-                    <span style="display:flex;align-items:center;">&#128269;</span>
+                    <span id="iconSearch" style="display:flex;align-items:center;"></span>
                 </span>
                 <input id="searchInput" type="text" placeholder="Search users, attributes, email, phone, groups…" />
             </div>
 
             <!-- Toolbar Right -->
             <div class="toolbar-right">
-                <button id="openFilter" class="btn ghost" title="Filter"></button>
-                <button id="openColumns" class="btn ghost" title="Columns"></button>
-
+                <button id="openFilter" class="btn ghost" title="Filter"><span id="iconFilter"></span> Filter</button>
+                <button id="openColumns" class="btn ghost" title="Columns"><span id="iconColumns"></span>
+                    Columns</button>
                 <button id="resetAll" class="btn ghost" title="Reset">Reset</button>
             </div>
         </div>
@@ -488,11 +466,7 @@
 
     </div>
 
-
-
-    <!-- ================================
-       MAIN CONTENT (TABLE)
-       ================================ -->
+    <!-- MAIN CONTENT (TABLE) -->
     <div class="layout">
 
         <!-- USER TABLE -->
@@ -507,23 +481,18 @@
 
     </div>
 
-
-
-    <!-- ================================
-       FILTER DRAWER
-       ================================ -->
+    <!-- FILTER DRAWER -->
     <div id="filterDrawer" class="drawer">
         <div class="row" style="justify-content:space-between;margin-bottom:10px;">
             <h3>Filters</h3>
-            <button class="btn icon ghost" onclick="closeFilterDrawer()">${svg('close')}</button>
+            <button class="btn icon ghost btn-close-drawer" onclick="closeFilterDrawer()"><span
+                    class="icon-close"></span></button>
         </div>
 
-        <!-- FIELD SELECTOR -->
         <div class="col" style="margin-bottom:16px;">
             <label class="small muted">Add filter for field:</label>
             <select id="filterFieldSelector"
-                style="padding:8px;background:var(--muted-panel);color:var(--text);border:1px solid var(--divider);border-radius:8px;">
-            </select>
+                style="padding:8px;background:var(--muted-panel);color:var(--text);border:1px solid var(--divider);border-radius:8px;"></select>
             <button class="btn" onclick="addFilterCondition()">Add Condition</button>
         </div>
 
@@ -533,15 +502,12 @@
         <button class="btn" onclick="applyFilters()">Apply Filters</button>
     </div>
 
-
-
-    <!-- ================================
-       COLUMNS DRAWER
-       ================================ -->
+    <!-- COLUMNS DRAWER -->
     <div id="columnDrawer" class="drawer">
         <div class="row" style="justify-content:space-between;margin-bottom:10px;">
             <h3>Visible Columns</h3>
-            <button class="btn icon ghost" onclick="closeColumnDrawer()">${svg('close')}</button>
+            <button class="btn icon ghost btn-close-drawer" onclick="closeColumnDrawer()"><span
+                    class="icon-close"></span></button>
         </div>
 
         <div id="columnList"></div>
@@ -550,20 +516,16 @@
         <button class="btn" onclick="saveColumnSelection()">Apply</button>
     </div>
 
-
-
-    <!-- ================================
-       DETAIL DRAWER (RIGHT PANEL)
-       ================================ -->
+    <!-- DETAIL DRAWER (RIGHT PANEL) -->
     <div id="detailDrawer" class="detail-drawer">
         <div class="detail-header">
             <h2 id="detailTitle" style="display:flex;align-items:center;gap:10px;">
-                <span>${svg('user')}</span>
+                <span id="detailUserIcon"></span>
                 User Details
             </h2>
 
-            <button class="btn icon ghost" onclick="closeDetailDrawer()">
-                ${svg('close')}
+            <button class="btn icon ghost btn-close-drawer" onclick="closeDetailDrawer()">
+                <span class="icon-close"></span>
             </button>
         </div>
 
@@ -572,11 +534,7 @@
         </div>
     </div>
 
-
-
-    <!-- ================================
-       OUTSIDE CLICK HANDLER
-       ================================ -->
+    <!-- OUTSIDE CLICK HANDLER -->
     <script>
         window.addEventListener("click", (event) => {
             const filter = document.getElementById("filterDrawer");
@@ -601,7 +559,6 @@
             }
         });
 
-        /* Escape key should close drawers */
         window.addEventListener("keydown", (e) => {
             if (e.key === "Escape") {
                 closeFilterDrawer();
@@ -610,21 +567,17 @@
             }
         });
     </script>
+
+    <!-- MSAL -->
     <script src="https://alcdn.msauth.net/browser/2.32.0/js/msal-browser.min.js"></script>
+
     <script>
-
-        document.getElementById("openFilter").innerHTML = svg('filter') + " Filter";
-        document.getElementById("openColumns").innerHTML = svg('columns') + " Columns";
-        document.getElementById("resetAll").innerHTML = "Reset"; // no icon
-        document.getElementById("detailDrawer").querySelector(".btn.icon.ghost").innerHTML = svg('close');
-
         /* ============================================================
-           CONFIG
+           CONFIG + FIELD DEFINITIONS + STATE
         ============================================================ */
-        const tenantId = "1b2bcaa0-2052-4943-bd9b-2511e7d57a21";
-        const clientId = "c34ceb14-3218-4ec5-8bd4-39a66ede3603";
-        //const redirectUri = window.location.origin;
-        const redirectUri = "https://flogerber.github.io/EntraIdUserMangement/";
+        const tenantId = '1b2bcaa0-2052-4943-bd9b-2511e7d57a21';
+        const clientId = 'c34ceb14-3218-4ec5-8bd4-39a66ede3603';
+        const redirectUri = "http://localhost:8080/UserBrowserNew.html"; // adjust if needed
 
         const scopes = ["User.Read.All", "Directory.Read.All"];
 
@@ -632,19 +585,8 @@
             auth: { clientId, authority: `https://login.microsoftonline.com/${tenantId}`, redirectUri }
         });
 
-        /* ============================================================
-           FIELD DEFINITIONS
-        ============================================================ */
-        const BASE_FIELDS = [
-            "displayName", "userPrincipalName", "mail", "mobile", "accountEnabled"
-        ];
-        const EXTRA_FIELDS = [
-            "jobTitle", "department", "companyName", "usageLocation",
-            "employeeId", "employeeType",
-            "country", "officeLocation", "streetAddress",
-            "id"
-        ];
-
+        const BASE_FIELDS = ["displayName", "userPrincipalName", "mail", "mobile", "accountEnabled"];
+        const EXTRA_FIELDS = ["jobTitle", "department", "companyName", "usageLocation", "employeeId", "employeeType", "country", "officeLocation", "streetAddress", "id"];
         const ALL_FIELDS = [...BASE_FIELDS, ...EXTRA_FIELDS];
 
         const FRIENDLY = {
@@ -665,9 +607,6 @@
             id: "Object ID"
         };
 
-        /* ============================================================
-           STATE
-        ============================================================ */
         let allUsers = [];
         let visibleColumns = [...BASE_FIELDS];
         let activeFilters = [];
@@ -675,25 +614,85 @@
         let sortDir = 1;
 
         /* ============================================================
-           GRAPH HELPERS
+           ICON + INIT HELPERS
         ============================================================ */
-        async function getToken() {
-            let account = msalInstance.getAllAccounts()[0];
-
-            if (!account)
-                await msalInstance.loginPopup({ scopes });
-
-            account = msalInstance.getAllAccounts()[0];
-
-            const result = await msalInstance.acquireTokenSilent({ scopes, account });
-            return result.accessToken;
+        function populateStaticIcons() {
+            const set = (id, name) => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = svg(name);
+            };
+            set("iconSearch", "search");
+            set("iconFilter", "filter");
+            set("iconColumns", "columns");
+            // detail user icon
+            const detailUserIcon = document.getElementById("detailUserIcon");
+            if (detailUserIcon) detailUserIcon.innerHTML = svg("user");
+            // close icons in drawers
+            document.querySelectorAll(".icon-close").forEach(span => span.innerHTML = svg("close"));
         }
 
+        /* ============================================================
+           MSAL: handle redirect result + robust getToken
+        ============================================================ */
+        // handle redirect responses (if any)
+        msalInstance.handleRedirectPromise().then((result) => {
+            // nothing obligatory to do here, but we ensure subsequent code will run
+            // console.log('handleRedirectPromise result', result);
+        }).catch(err => {
+            console.warn("handleRedirectPromise error", err);
+        });
+
+        async function getToken() {
+            // prefer cached account
+            let account = msalInstance.getAllAccounts()[0];
+
+            if (!account) {
+                try {
+                    // interactive login popup
+                    await msalInstance.loginPopup({ scopes });
+                    account = msalInstance.getAllAccounts()[0];
+                } catch (loginErr) {
+                    console.error("loginPopup failed", loginErr);
+                    // fallback to redirect - better UX: redirect only when popup not available
+                    msalInstance.loginRedirect({ scopes });
+                    return null;
+                }
+            }
+
+            try {
+                const silent = await msalInstance.acquireTokenSilent({ scopes, account });
+                return silent.accessToken;
+            } catch (silentErr) {
+                console.warn("acquireTokenSilent failed, trying popup", silentErr);
+                try {
+                    const pop = await msalInstance.acquireTokenPopup({ scopes, account });
+                    return pop.accessToken;
+                } catch (popupErr) {
+                    console.error("acquireTokenPopup failed, falling back to redirect", popupErr);
+                    try {
+                        // redirect will navigate away; return null to halt current flow
+                        msalInstance.acquireTokenRedirect({ scopes, account });
+                        return null;
+                    } catch (redirectErr) {
+                        console.error("acquireTokenRedirect failed", redirectErr);
+                        return null;
+                    }
+                }
+            }
+        }
+
+        /* ============================================================
+           GRAPH HELPERS
+        ============================================================ */
         async function fetchAllPages(url, token) {
             let items = [];
-
             while (url) {
                 const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+                if (!res.ok) {
+                    // throw or return partial - surface error
+                    const txt = await res.text();
+                    throw new Error(`Graph fetch failed: ${res.status} ${txt}`);
+                }
                 const data = await res.json();
                 items.push(...(data.value || []));
                 url = data["@odata.nextLink"];
@@ -703,9 +702,16 @@
 
         async function loadUsers() {
             const token = await getToken();
+            if (!token) return; // redirect or login in progress
+
             const url = `https://graph.microsoft.com/v1.0/users?$select=${ALL_FIELDS.join(",")}`;
 
-            allUsers = await fetchAllPages(url, token);
+            try {
+                allUsers = await fetchAllPages(url, token);
+            } catch (err) {
+                console.error("Failed to load users", err);
+                allUsers = [];
+            }
 
             renderTable(allUsers);
             populateFilterFields();
@@ -718,37 +724,39 @@
         function renderTable(data) {
             const head = document.getElementById("tableHead");
             const body = document.getElementById("tableBody");
+            if (!head || !body) return;
 
-            /* HEAD */
-            head.innerHTML = `
-    <tr>
-      ${visibleColumns.map(c =>
-                `<th onclick="sortBy('${c}')">${FRIENDLY[c] ?? c} ${sortField === c ? (sortDir === 1 ? "▲" : "▼") : ""
-                }</th>`
-            ).join("")}
-    </tr>
-  `;
+            head.innerHTML = `<tr>
+        ${visibleColumns.map(c => `<th onclick="sortBy('${c}')">${FRIENDLY[c] ?? c} ${sortField === c ? (sortDir === 1 ? "▲" : "▼") : ""}</th>`).join("")}
+      </tr>`;
 
-            /* BODY */
-            body.innerHTML = data
-                .map(u => `
-      <tr onclick="openUserDetails('${u.id}')">
+            body.innerHTML = data.map(u => `<tr onclick="openUserDetails('${u.id}')">
         ${visibleColumns.map(f => formatCell(f, u)).join("")}
-      </tr>
-    `)
-                .join("");
+      </tr>`).join("");
         }
 
         function formatCell(field, user) {
             let val = user[field] ?? "";
-
             if (field === "accountEnabled") {
-                return `<td><span class="${val ? "badge-active" : "badge-disabled"}">
-      ${val ? "Active" : "Disabled"}
-    </span></td>`;
+                return `<td><span class="badge ${val ? "active" : "disabled"}">${val ? "Active" : "Disabled"}</span></td>`;
             }
+            return `<td>${escapeHtml(String(val))}</td>`;
+        }
 
-            return `<td>${val}</td>`;
+        // simple escaping for cell output
+        function escapeHtml(str) {
+            return str.replace(/[&<>"'`=\/]/g, function (s) {
+                return ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;',
+                    '`': '&#96;',
+                    '=': '&#61;',
+                    '/': '&#47;'
+                })[s];
+            });
         }
 
         /* ============================================================
@@ -762,25 +770,25 @@
             }
 
             const sorted = [...allUsers].sort((a, b) => {
-                const x = (a[field] ?? "").toString().toLowerCase();
-                const y = (b[field] ?? "").toString().toLowerCase();
-                return x > y ? sortDir : x < y ? -sortDir : 0;
+                const x = ((a[field] ?? "") + "").toString().toLowerCase();
+                const y = ((b[field] ?? "") + "").toString().toLowerCase();
+                if (x > y) return sortDir;
+                if (x < y) return -sortDir;
+                return 0;
             });
 
             renderTable(sorted);
         }
 
         /* ============================================================
-           GLOBAL SEARCH + FILTERS
+           SEARCH + FILTERS
         ============================================================ */
         function applySearchAndFilters() {
-            const search = document.getElementById("searchInput").value.toLowerCase();
+            const search = (document.getElementById("searchInput")?.value || "").toLowerCase();
 
-            let data = allUsers.filter(u => {
-                const text = Object.values(u).join(" ").toLowerCase();
-
+            const data = allUsers.filter(u => {
+                const text = Object.values(u || {}).join(" ").toLowerCase();
                 if (!text.includes(search)) return false;
-
                 return activeFilters.every(f => applyFilter(u, f));
             });
 
@@ -788,8 +796,8 @@
         }
 
         function applyFilter(user, f) {
-            const val = (user[f.field] ?? "").toString().toLowerCase();
-            const needle = f.value.toLowerCase();
+            const val = ((user[f.field] ?? "") + "").toString().toLowerCase();
+            const needle = (f.value || "").toLowerCase();
 
             switch (f.op) {
                 case "contains": return val.includes(needle);
@@ -800,6 +808,7 @@
                 case "notempty": return val !== "";
                 case "true": return val === "true";
                 case "false": return val === "false";
+                default: return true;
             }
         }
 
@@ -808,29 +817,27 @@
         ============================================================ */
         function populateFilterFields() {
             const sel = document.getElementById("filterFieldSelector");
-            sel.innerHTML = ALL_FIELDS
-                .map(f => `<option value="${f}">${FRIENDLY[f] ?? f}</option>`)
-                .join("");
+            if (!sel) return;
+            sel.innerHTML = ALL_FIELDS.map(f => `<option value="${f}">${FRIENDLY[f] ?? f}</option>`).join("");
         }
 
         function addFilterCondition() {
-            const field = document.getElementById("filterFieldSelector").value;
-
+            const field = document.getElementById("filterFieldSelector")?.value;
+            if (!field) return;
             activeFilters.push({ field, op: "contains", value: "" });
             redrawActiveFilters();
         }
 
         function redrawActiveFilters() {
             const wrap = document.getElementById("activeFilters");
+            if (!wrap) return;
 
-            wrap.innerHTML = activeFilters
-                .map((f, idx) => `
-      <div class="chip">
-        ${FRIENDLY[f.field] ?? f.field}: ${f.op} "${f.value}"
-        <button onclick="removeFilter(${idx})">✖</button>
-      </div>
-    `)
-                .join("");
+            wrap.innerHTML = activeFilters.map((f, idx) => `
+        <div class="chip">
+          ${escapeHtml(FRIENDLY[f.field] ?? f.field)}: ${escapeHtml(f.op)} "${escapeHtml(f.value || "")}"
+          <button onclick="removeFilter(${idx})">✖</button>
+        </div>
+      `).join("");
         }
 
         function removeFilter(i) {
@@ -844,12 +851,11 @@
             closeFilterDrawer();
         }
 
-        /* DRAWER OPEN/CLOSE */
         function openFilterDrawer() {
-            document.getElementById("filterDrawer").classList.add("open");
+            document.getElementById("filterDrawer")?.classList.add("open");
         }
         function closeFilterDrawer() {
-            document.getElementById("filterDrawer").classList.remove("open");
+            document.getElementById("filterDrawer")?.classList.remove("open");
         }
 
         /* ============================================================
@@ -857,16 +863,14 @@
         ============================================================ */
         function populateColumnDrawer() {
             const wrap = document.getElementById("columnList");
+            if (!wrap) return;
 
-            wrap.innerHTML = ALL_FIELDS
-                .map(f => `
-      <label class="toggle">
-        <input type="checkbox" ${visibleColumns.includes(f) ? "checked" : ""} 
-           onchange="toggleColumn('${f}', this.checked)">
-        ${FRIENDLY[f] ?? f}
-      </label>
-    `)
-                .join("");
+            wrap.innerHTML = ALL_FIELDS.map(f => `
+        <label class="toggle" style="display:block;padding:6px 0;">
+          <input type="checkbox" ${visibleColumns.includes(f) ? "checked" : ""} onchange="toggleColumn('${f}', this.checked)">
+          ${escapeHtml(FRIENDLY[f] ?? f)}
+        </label>
+      `).join("");
         }
 
         function toggleColumn(field, show) {
@@ -884,10 +888,10 @@
 
         function openColumnDrawer() {
             populateColumnDrawer();
-            document.getElementById("columnDrawer").classList.add("open");
+            document.getElementById("columnDrawer")?.classList.add("open");
         }
         function closeColumnDrawer() {
-            document.getElementById("columnDrawer").classList.remove("open");
+            document.getElementById("columnDrawer")?.classList.remove("open");
         }
 
         /* ============================================================
@@ -895,41 +899,38 @@
         ============================================================ */
         async function openUserDetails(id) {
             const token = await getToken();
+            if (!token) return;
 
-            const res = await fetch(
-                `https://graph.microsoft.com/v1.0/users/${id}?$select=${ALL_FIELDS.join(",")}`,
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-
+            const res = await fetch(`https://graph.microsoft.com/v1.0/users/${id}?$select=${ALL_FIELDS.join(",")}`, { headers: { Authorization: `Bearer ${token}` } });
+            if (!res.ok) {
+                console.error("Failed to fetch user", res.status);
+                return;
+            }
             const user = await res.json();
-
             renderUserDetails(user);
-            document.getElementById("detailDrawer").classList.add("open");
+            document.getElementById("detailDrawer")?.classList.add("open");
         }
 
         function renderUserDetails(u) {
             const wrap = document.getElementById("detailContent");
+            if (!wrap) return;
 
-            wrap.innerHTML = `
-    ${ALL_FIELDS
-                    .map(f => `
+            wrap.innerHTML = ALL_FIELDS.map(f => `
         <div class="detail-row">
-          <div class="label">${FRIENDLY[f] ?? f}</div>
-          <div class="value">${u[f] ?? ""}</div>
+          <div class="label">${escapeHtml(FRIENDLY[f] ?? f)}</div>
+          <div class="value">${escapeHtml((u[f] ?? "") + "")}</div>
         </div>
-      `)
-                    .join("")}
-  `;
+      `).join("");
         }
 
         function closeDetailDrawer() {
-            document.getElementById("detailDrawer").classList.remove("open");
+            document.getElementById("detailDrawer")?.classList.remove("open");
         }
 
         /* ============================================================
-           EVENT BINDINGS
+           EVENT BINDINGS + INIT
         ============================================================ */
-        document.getElementById("searchInput").addEventListener("input", applySearchAndFilters);
+        document.getElementById("searchInput")?.addEventListener("input", applySearchAndFilters);
         document.getElementById("openFilter").onclick = openFilterDrawer;
         document.getElementById("openColumns").onclick = openColumnDrawer;
         document.getElementById("resetAll").onclick = () => {
@@ -939,10 +940,19 @@
             renderTable(allUsers);
         };
 
-        /* ============================================================
-           INIT
-        ============================================================ */
-        window.onload = loadUsers;
+        // close drawer buttons (delegated for all drawer close icons)
+        document.addEventListener("click", (e) => {
+            const el = e.target;
+            if (el && el.classList && el.classList.contains('btn-close')) closeFilterDrawer();
+        });
+
+        // populate icons and then start the auth+load flow
+        document.addEventListener("DOMContentLoaded", async () => {
+            populateStaticIcons();
+
+            // start auth + load users
+            await loadUsers();
+        });
     </script>
 
 </body>
