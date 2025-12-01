@@ -540,6 +540,19 @@ function renderUserDetailsPanel(user, categorized, licenseDisplay, dirRoles) {
 /* ========================
    Drawer open/close helpers
    ======================== */
+
+function closeDetailDrawer() {
+    const drawer = document.getElementById("detailDrawer");
+    if (!drawer) return;
+
+    drawer.classList.remove("open");
+    drawer.style.transform = "translateX(100%)";
+
+    // Optional: clear content for safety
+    const wrapper = document.getElementById("detailGridWrapper");
+    if (wrapper) wrapper.innerHTML = "";
+}
+
 function closeDetailDrawer() { document.getElementById("detailDrawer")?.classList.remove("open"); }
 function openFilterDrawer() { document.getElementById("filterDrawer")?.classList.add("open"); }
 function closeFilterDrawer() { document.getElementById("filterDrawer")?.classList.remove("open"); }
@@ -549,6 +562,7 @@ function closeColumnDrawer() { document.getElementById("columnDrawer")?.classLis
 /* ========================
    Column + event bindings + init
    ======================== */
+
 document.getElementById("searchInput")?.addEventListener("input", applySearchAndFilters);
 document.getElementById("openFilter").onclick = openFilterDrawer;
 document.getElementById("openColumns").onclick = openColumnDrawer;
