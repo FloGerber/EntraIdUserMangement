@@ -16,15 +16,51 @@ const msalInstance = new msal.PublicClientApplication(msalConfig);
 /* ========================
    FIELDS / STATE
    ======================== */
-const BASE_FIELDS = ["displayName", "userPrincipalName", "mail", "mobile", "accountEnabled"];
-const EXTRA_FIELDS = ["jobTitle", "department", "companyName", "usageLocation", "employeeId", "employeeType", "country", "officeLocation", "streetAddress", "id"];
-const ALL_FIELDS = [...BASE_FIELDS, ...EXTRA_FIELDS, "id"];
+const BASE_FIELDS = ['displayName', 'userPrincipalName', 'employeeId', 'accountEnabled', 'department', 'employeeType', 'companyName'];
+const EXTRA_FIELDS = [
+    'id', 'isSoftDeleted', 'streetAddress', 'city', 'state', 'postalCode',
+    'employeeHireDate', 'employeeLeaveDateTime', 'givenName', 'jobTitle',
+    'manager', 'mail', 'mailNickname', 'mobile', 'country', 'usageLocation',
+    'physicalDeliveryOfficeName', 'preferredLanguage', 'surname', 'telephoneNumber',
+    'extension_053de6c8cbb24c53b4ca2638882c659f_wdSupervisioryOrganisation',
+    'extension_053de6c8cbb24c53b4ca2638882c659f_wdManagementLevelId',
+    'extension_053de6c8cbb24c53b4ca2638882c659f_wdJobProfileName',
+    'extension_053de6c8cbb24c53b4ca2638882c659f_wdJobFamilyId',
+    'extension_053de6c8cbb24c53b4ca2638882c659f_wdLocationHierarchy',
+    'extension_053de6c8cbb24c53b4ca2638882c659f_wdCostCenter',
+    'extension_053de6c8cbb24c53b4ca2638882c659f_wdCostCenterHierarchy',
+    'extension_053de6c8cbb24c53b4ca2638882c659f_wdContingentWorkerID',
+    'extension_053de6c8cbb24c53b4ca2638882c659f_wdManagementLevelDescription',
+    'extension_053de6c8cbb24c53b4ca2638882c659f_wdEmployeeID'
+];
+const ALL_FIELDS = [...BASE_FIELDS, ...EXTRA_FIELDS];
 
 const FRIENDLY = {
-    displayName: "Display Name", userPrincipalName: "User Principal Name", mail: "Email", mobile: "Mobile",
-    jobTitle: "Job Title", department: "Department", companyName: "Company", accountEnabled: "Enabled",
-    usageLocation: "Usage Location", employeeId: "Employee ID", employeeType: "Employee Type",
-    country: "Country", officeLocation: "Office", streetAddress: "Address", id: "Object ID"
+    "displayName": "Display Name",
+    "userPrincipalName": "User Principal Name",
+    "employeeId": "EmployeeID",
+    "accountEnabled": "Account Enabled",
+    "givenName": "First Name",
+    "jobTitle": "Job Title",
+    "mail": "Email",
+    "mobile": "Mobile Phone",
+    "department": "Department",
+    "country": "Country",
+    "companyName": "Company",
+    "employeeType": "Employee Type",
+    "usageLocation": "Usage Location",
+    "physicalDeliveryOfficeName": "Office Location",
+    "id": "ID",
+    'extension_053de6c8cbb24c53b4ca2638882c659f_wdSupervisioryOrganisation': "Supervisory Organisation",
+    'extension_053de6c8cbb24c53b4ca2638882c659f_wdManagementLevelId': "Management Level ID",
+    'extension_053de6c8cbb24c53b4ca2638882c659f_wdJobProfileName': "Job Profile Name",
+    'extension_053de6c8cbb24c53b4ca2638882c659f_wdJobFamilyId': "Job Family ID",
+    'extension_053de6c8cbb24c53b4ca2638882c659f_wdLocationHierarchy': "Location Hierarchy",
+    'extension_053de6c8cbb24c53b4ca2638882c659f_wdCostCenter': "Cost Center",
+    'extension_053de6c8cbb24c53b4ca2638882c659f_wdCostCenterHierarchy': "Cost Center Hierarchy",
+    'extension_053de6c8cbb24c53b4ca2638882c659f_wdContingentWorkerID': "Contingent Worker ID",
+    'extension_053de6c8cbb24c53b4ca2638882c659f_wdManagementLevelDescription': "Management Level Description",
+    'extension_053de6c8cbb24c53b4ca2638882c659f_wdEmployeeID': "Employee ID"
 };
 
 let allUsers = [];
@@ -385,96 +421,77 @@ function openDetailSkeleton(title, subtitle) {
 }
 
 async function openUserDetails(encodedId) {
-
-    console.log("Attempting to open detail drawer...");
     const drawer = document.getElementById("detailDrawer");
-
-    if (!drawer) {
-        console.error("Drawer element not found!");
+    const wrapper = document.getElementById("detailGridWrapper");
+    if (!drawer || !wrapper) {
+        console.error("Drawer or wrapper not found!");
         return;
     }
 
-    // Log current class list
-    console.log("Drawer classes after update:", drawer.className);
-
-    // Check computed style
-    const style = window.getComputedStyle(drawer);
-    console.log("Drawer transform:", style.transform);
-
     const id = decodeURIComponent(encodedId || '');
-
-
+    if (!id) return;
 
     console.log("Opening detail drawer, id:", id);
-    console.log("Drawer before classList:", drawer.className);
-    drawer.classList.add("open");
 
-    console.log("Drawer after classList:", drawer.className);
-    console.log("Computed transform:", window.getComputedStyle(drawer).transform);
-
-
-
-
-
-
-    console.log("Adding open class to drawer...");
-
-    if (!id) return;
-    // show skeleton immediately and open drawer
-    document.getElementById("detailDrawer")?.classList.add("open");
+    // 1️⃣ Show skeleton immediately
     openDetailSkeleton("Loading...", "");
 
-    const token = await getToken();
-    if (!token) return;
+    // 2️⃣ Open drawer (CSS handles slide-in)
+    drawer.classList.add("open");
+    drawer.style.transform = "translateX(0)";
 
-    // Try to find user in allUsers
-    const user = allUsers.find(u => u.id === id) || null;
-    console.log("USER OBJECT:", user);
-
-    // Fetch groups, licenses, roles
     try {
+        const token = await getToken();
+        if (!token) throw new Error("No token available");
+
+        // 3️⃣ Fetch user and related data
+        const user = allUsers.find(u => u.id === id) || null;
+        console.log("USER OBJECT:", user);
+
         const [groups, licenses] = await Promise.all([
             loadUserGroups(id, token),
             loadUserLicenses(id, token)
         ]);
+
         const rolesMap = await loadDirectoryRoles(token);
 
-        // Categorize groups
+        // 4️⃣ Categorize groups
         const categorized = { security: [], m365: [], distribution: [], other: [] };
         (groups || []).forEach(g => {
             const t = g['@odata.type'] || '';
-            // groupTypes is present for M365 groups (groupTypes includes 'Unified')
-            const isUnified = g.groupTypes && Array.isArray(g.groupTypes) && g.groupTypes.includes('Unified');
+            const isUnified = g.groupTypes?.includes('Unified');
             if (t.includes('group')) {
                 if (g.securityEnabled) categorized.security.push(g);
                 else if (isUnified || g.mailEnabled) categorized.m365.push(g);
                 else if (!g.securityEnabled && !g.mailEnabled) categorized.distribution.push(g);
                 else categorized.other.push(g);
             } else if (t.includes('directoryRole')) {
-                // directory role — treat as role
                 categorized.other.push({ ...g, isRole: true });
             } else categorized.other.push(g);
         });
 
-        // Build license friendly names by mapping skuId -> skuPartNumber via subscribedSkus
+        // 5️⃣ Map licenses to friendly names
         const subSkus = await loadSubscribedSkus(token);
         const licenseDisplay = (licenses || []).map(l => {
-            const skuId = l.skuId || l.skuId;
-            const friendly = (subSkus && subSkus[skuId]) ? subSkus[skuId] : (l.skuPartNumber || skuId);
-            return { sku: friendly, skuId };
+            const friendly = subSkus?.[l.skuId] || l.skuPartNumber || l.skuId;
+            return { sku: friendly, skuId: l.skuId };
         });
 
-        // Directory roles can also be retrieved from memberOf or mapped via cachedDirectoryRoles
-        const dirRoles = (groups || []).filter(g => (g['@odata.type'] || '').includes('directoryRole')).map(r => rolesMap[r.id] || r.displayName || r.id);
+        // 6️⃣ Directory roles
+        const dirRoles = (groups || [])
+            .filter(g => (g['@odata.type'] || '').includes('directoryRole'))
+            .map(r => rolesMap[r.id] || r.displayName || r.id);
 
-        // render details
+        // 7️⃣ Render all details
         renderUserDetailsPanel(user, categorized, licenseDisplay, dirRoles);
     } catch (err) {
         console.error("Failed to load expanded details", err);
-        // fallback: show basic user data
+        // fallback: show basic user
+        const user = allUsers.find(u => u.id === id) || null;
         renderUserDetailsPanel(user, {}, [], []);
     }
 }
+
 
 function renderUserDetailsPanel(user, categorized, licenseDisplay, dirRoles) {
     console.log("USER:", user);
