@@ -438,7 +438,7 @@ async function openUserDetails(encodedId) {
 
     // 2️⃣ Open drawer (CSS handles slide-in)
     drawer.classList.add("open");
-    drawer.style.transform = "translateX(0)";
+    //drawer.style.transform = "translateX(0)";
 
     try {
         const token = await getToken();
