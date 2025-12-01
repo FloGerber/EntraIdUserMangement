@@ -433,18 +433,12 @@ async function openUserDetails(encodedId) {
 
     console.log("Opening detail drawer, id:", id);
 
-    // 1️⃣ Show skeleton immediately
     openDetailSkeleton("Loading...", "");
-
-    // 2️⃣ Open drawer (CSS handles slide-in)
-    drawer.classList.add("open");
-    //drawer.style.transform = "translateX(0)";
 
     try {
         const token = await getToken();
         if (!token) throw new Error("No token available");
 
-        // 3️⃣ Fetch user and related data
         const user = allUsers.find(u => u.id === id) || null;
         console.log("USER OBJECT:", user);
 
@@ -455,7 +449,6 @@ async function openUserDetails(encodedId) {
 
         const rolesMap = await loadDirectoryRoles(token);
 
-        // 4️⃣ Categorize groups
         const categorized = { security: [], m365: [], distribution: [], other: [] };
         (groups || []).forEach(g => {
             const t = g['@odata.type'] || '';
@@ -470,19 +463,16 @@ async function openUserDetails(encodedId) {
             } else categorized.other.push(g);
         });
 
-        // 5️⃣ Map licenses to friendly names
         const subSkus = await loadSubscribedSkus(token);
         const licenseDisplay = (licenses || []).map(l => {
             const friendly = subSkus?.[l.skuId] || l.skuPartNumber || l.skuId;
             return { sku: friendly, skuId: l.skuId };
         });
 
-        // 6️⃣ Directory roles
         const dirRoles = (groups || [])
             .filter(g => (g['@odata.type'] || '').includes('directoryRole'))
             .map(r => rolesMap[r.id] || r.displayName || r.id);
 
-        // 7️⃣ Render all details
         renderUserDetailsPanel(user, categorized, licenseDisplay, dirRoles);
     } catch (err) {
         console.error("Failed to load expanded details", err);
@@ -490,6 +480,7 @@ async function openUserDetails(encodedId) {
         const user = allUsers.find(u => u.id === id) || null;
         renderUserDetailsPanel(user, {}, [], []);
     }
+    drawer.classList.add("open");
 }
 
 

@@ -468,7 +468,3 @@ input {
     border: 1px solid var(--divider);
     color: var(--text-secondary)
 }
-
-#detailDrawer.detail-drawer.open {
-    transform: translateX(0) !important;
-}
