@@ -6,9 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Entra ID — User Browser (Fluent Dark)</title>
 
-    <!-- Fluent Dark palette + base styles -->
     <style>
-        /* (your CSS unchanged) */
         :root {
             --bg: #1E1E1E;
             --surface: #252526;
@@ -24,9 +22,7 @@
             --success: #107C10;
             --danger: #A4262C;
             --chip-bg: #2F2F30;
-            --glass: rgba(255, 255, 255, 0.02);
             --radius: 10px;
-            --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Segoe UI Mono", monospace;
             --ui-font: "Segoe UI", Roboto, system-ui, -apple-system, "Helvetica Neue", Arial;
         }
 
@@ -44,18 +40,6 @@
         body {
             padding: 20px;
             box-sizing: border-box;
-        }
-
-        .visually-hidden {
-            position: absolute !important;
-            height: 1px;
-            width: 1px;
-            overflow: hidden;
-            clip: rect(1px, 1px, 1px, 1px);
-            white-space: nowrap;
-            border: 0;
-            padding: 0;
-            margin: -1px;
         }
 
         .row {
@@ -140,11 +124,6 @@
             padding: 6px;
         }
 
-        .search-hint {
-            color: var(--text-secondary);
-            font-size: 13px;
-        }
-
         .toolbar-right {
             display: flex;
             gap: 8px;
@@ -215,12 +194,6 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.02);
         }
 
-        .col-name {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
         .avatar {
             width: 32px;
             height: 32px;
@@ -279,30 +252,61 @@
             gap: 8px;
         }
 
+        /* DRAWERS: use translateX to hide fully */
         .drawer {
             position: fixed;
-            right: -420px;
+            right: 0;
             top: 0;
             height: 100vh;
             width: 420px;
             max-width: calc(100% - 40px);
             background: linear-gradient(180deg, var(--panel), var(--surface));
             box-shadow: -20px 0 40px rgba(0, 0, 0, 0.7);
-            transition: right .22s ease;
+            transition: transform .22s ease;
             border-left: 1px solid var(--divider);
             padding: 18px;
             z-index: 1200;
             overflow: auto;
+            transform: translateX(100%);
         }
 
         .drawer.open {
-            right: 20px;
+            transform: translateX(0);
         }
 
         .drawer h3 {
             margin: 0 0 12px;
             color: var(--text);
             font-size: 18px;
+        }
+
+        .detail-drawer {
+            position: fixed;
+            right: 0;
+            top: 0;
+            height: 100vh;
+            width: 720px;
+            max-width: calc(100% - 40px);
+            background: linear-gradient(180deg, var(--panel), #262626);
+            box-shadow: -20px 0 60px rgba(0, 0, 0, 0.7);
+            transition: transform .25s ease;
+            border-left: 1px solid var(--divider);
+            padding: 20px;
+            z-index: 1300;
+            overflow: auto;
+            transform: translateX(100%);
+        }
+
+        .detail-drawer.open {
+            transform: translateX(0);
+        }
+
+        .detail-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
         .field-row {
@@ -313,39 +317,6 @@
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.02);
             margin-bottom: 8px;
-        }
-
-        .field-row label {
-            flex: 1;
-            color: var(--text);
-        }
-
-        .detail-drawer {
-            position: fixed;
-            right: -720px;
-            top: 0;
-            height: 100vh;
-            width: 720px;
-            max-width: calc(100% - 40px);
-            background: linear-gradient(180deg, var(--panel), #262626);
-            box-shadow: -20px 0 60px rgba(0, 0, 0, 0.7);
-            transition: right .25s ease;
-            border-left: 1px solid var(--divider);
-            padding: 20px;
-            z-index: 1300;
-            overflow: auto;
-        }
-
-        .detail-drawer.open {
-            right: 0;
-        }
-
-        .detail-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 12px;
         }
 
         .detail-grid {
@@ -419,9 +390,42 @@
                 transform: none
             }
         }
+
+        label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        select,
+        input {
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid var(--divider);
+            background: var(--muted-panel);
+            color: var(--text);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .cond-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .cond-row>* {
+            flex: 1;
+        }
+
+        .cond-row .op {
+            max-width: 150px;
+        }
     </style>
 
-    <!-- Icons (inline SVG used later in JS or markup) -->
+    <!-- SVG helper -->
     <script>
         function svg(name) {
             const icons = {
@@ -434,17 +438,11 @@
             return icons[name] || '';
         }
     </script>
-
 </head>
 
 <body>
-
-    <!-- HEADER + FULL-WIDTH SEARCH BAR -->
     <div class="app-header fade-in">
-
         <div class="toolbar">
-
-            <!-- FULL WIDTH SEARCH -->
             <div class="search-full">
                 <span style="color:var(--text-secondary);display:flex;align-items:center;">
                     <span id="iconSearch" style="display:flex;align-items:center;"></span>
@@ -452,7 +450,6 @@
                 <input id="searchInput" type="text" placeholder="Search users, attributes, email, phone, groups…" />
             </div>
 
-            <!-- Toolbar Right -->
             <div class="toolbar-right">
                 <button id="openFilter" class="btn ghost" title="Filter"><span id="iconFilter"></span> Filter</button>
                 <button id="openColumns" class="btn ghost" title="Columns"><span id="iconColumns"></span>
@@ -461,15 +458,10 @@
             </div>
         </div>
 
-        <!-- Active filter chips -->
         <div id="activeFilters" class="chips"></div>
-
     </div>
 
-    <!-- MAIN CONTENT (TABLE) -->
     <div class="layout">
-
-        <!-- USER TABLE -->
         <div class="card fade-in">
             <div class="table-wrap" id="tableContainer">
                 <table class="user-table">
@@ -478,32 +470,43 @@
                 </table>
             </div>
         </div>
-
     </div>
 
     <!-- FILTER DRAWER -->
-    <div id="filterDrawer" class="drawer">
+    <div id="filterDrawer" class="drawer" aria-hidden="true">
         <div class="row" style="justify-content:space-between;margin-bottom:10px;">
             <h3>Filters</h3>
             <button class="btn icon ghost btn-close-drawer" onclick="closeFilterDrawer()"><span
                     class="icon-close"></span></button>
         </div>
 
-        <div class="col" style="margin-bottom:16px;">
-            <label class="small muted">Add filter for field:</label>
-            <select id="filterFieldSelector"
-                style="padding:8px;background:var(--muted-panel);color:var(--text);border:1px solid var(--divider);border-radius:8px;"></select>
-            <button class="btn" onclick="addFilterCondition()">Add Condition</button>
+        <div class="col" style="margin-bottom:12px;">
+            <label for="filterFieldSelector">Add filter for field:</label>
+            <select id="filterFieldSelector"></select>
         </div>
 
-        <div id="filterConditions"></div>
-        <div class="sep"></div>
-
-        <button class="btn" onclick="applyFilters()">Apply Filters</button>
+        <div id="conditionEditor">
+            <div class="cond-row">
+                <select id="filterOperator" class="op">
+                    <option value="contains">contains</option>
+                    <option value="equals">equals</option>
+                    <option value="starts">starts with</option>
+                    <option value="ends">ends with</option>
+                    <option value="empty">is empty</option>
+                    <option value="notempty">is not empty</option>
+                </select>
+                <input id="filterValue" type="text" placeholder="Value (leave empty for empty/notempty)" />
+            </div>
+            <div style="display:flex;gap:8px;">
+                <button class="btn" onclick="addFilterCondition()">Add Condition</button>
+                <button class="btn ghost" onclick="applyFilters()">Apply Filters</button>
+            </div>
+        </div>
+        <div class="sep" style="margin-top:12px;"></div>
     </div>
 
     <!-- COLUMNS DRAWER -->
-    <div id="columnDrawer" class="drawer">
+    <div id="columnDrawer" class="drawer" aria-hidden="true">
         <div class="row" style="justify-content:space-between;margin-bottom:10px;">
             <h3>Visible Columns</h3>
             <button class="btn icon ghost btn-close-drawer" onclick="closeColumnDrawer()"><span
@@ -516,55 +519,33 @@
         <button class="btn" onclick="saveColumnSelection()">Apply</button>
     </div>
 
-    <!-- DETAIL DRAWER (RIGHT PANEL) -->
-    <div id="detailDrawer" class="detail-drawer">
+    <!-- DETAIL DRAWER -->
+    <div id="detailDrawer" class="detail-drawer" aria-hidden="true">
         <div class="detail-header">
             <h2 id="detailTitle" style="display:flex;align-items:center;gap:10px;">
-                <span id="detailUserIcon"></span>
-                User Details
+                <span id="detailUserIcon"></span> User Details
             </h2>
-
-            <button class="btn icon ghost btn-close-drawer" onclick="closeDetailDrawer()">
-                <span class="icon-close"></span>
-            </button>
+            <button class="btn icon ghost btn-close-drawer" onclick="closeDetailDrawer()"><span
+                    class="icon-close"></span></button>
         </div>
 
-        <div id="detailContent">
-            <!-- JS populates cards -->
-        </div>
+        <div id="detailContent"></div>
     </div>
 
-    <!-- OUTSIDE CLICK HANDLER -->
+    <!-- OUTSIDE CLICK HANDLER, ESC -->
     <script>
         window.addEventListener("click", (event) => {
             const filter = document.getElementById("filterDrawer");
             const col = document.getElementById("columnDrawer");
             const detail = document.getElementById("detailDrawer");
 
-            if (filter.classList.contains("open") &&
-                !filter.contains(event.target) &&
-                event.target !== document.getElementById("openFilter")) {
-                closeFilterDrawer();
-            }
-
-            if (col.classList.contains("open") &&
-                !col.contains(event.target) &&
-                event.target !== document.getElementById("openColumns")) {
-                closeColumnDrawer();
-            }
-
-            if (detail.classList.contains("open") &&
-                !detail.contains(event.target)) {
-                closeDetailDrawer();
-            }
+            if (filter?.classList.contains("open") && !filter.contains(event.target) && event.target !== document.getElementById("openFilter")) closeFilterDrawer();
+            if (col?.classList.contains("open") && !col.contains(event.target) && event.target !== document.getElementById("openColumns")) closeColumnDrawer();
+            if (detail?.classList.contains("open") && !detail.contains(event.target)) closeDetailDrawer();
         });
 
         window.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") {
-                closeFilterDrawer();
-                closeColumnDrawer();
-                closeDetailDrawer();
-            }
+            if (e.key === "Escape") { closeFilterDrawer(); closeColumnDrawer(); closeDetailDrawer(); }
         });
     </script>
 
@@ -572,39 +553,31 @@
     <script src="https://alcdn.msauth.net/browser/2.32.0/js/msal-browser.min.js"></script>
 
     <script>
-        /* ============================================================
-           CONFIG + FIELD DEFINITIONS + STATE
-        ============================================================ */
+        /* ===========================
+           CONFIG / FIELDS / STATE
+        ============================*/
         const tenantId = '1b2bcaa0-2052-4943-bd9b-2511e7d57a21';
         const clientId = 'c34ceb14-3218-4ec5-8bd4-39a66ede3603';
-        const redirectUri = "https://flogerber.github.io/EntraIdUserMangement/"; // adjust if needed
+        const redirectUri = "https://flogerber.github.io/EntraIdUserMangement/";
+
+        const msalConfig = {
+            auth: { clientId, authority: `https://login.microsoftonline.com/${tenantId}`, redirectUri },
+            cache: { cacheLocation: "localStorage", storeAuthStateInCookie: false }
+        };
 
         const scopes = ["User.Read.All", "Directory.Read.All"];
 
-        const msalInstance = new msal.PublicClientApplication({
-            auth: { clientId, authority: `https://login.microsoftonline.com/${tenantId}`, redirectUri }
-        });
+        const msalInstance = new msal.PublicClientApplication(msalConfig);
 
         const BASE_FIELDS = ["displayName", "userPrincipalName", "mail", "mobile", "accountEnabled"];
         const EXTRA_FIELDS = ["jobTitle", "department", "companyName", "usageLocation", "employeeId", "employeeType", "country", "officeLocation", "streetAddress", "id"];
         const ALL_FIELDS = [...BASE_FIELDS, ...EXTRA_FIELDS];
 
         const FRIENDLY = {
-            displayName: "Display Name",
-            userPrincipalName: "User Principal Name",
-            mail: "Email",
-            mobile: "Mobile",
-            jobTitle: "Job Title",
-            department: "Department",
-            companyName: "Company",
-            accountEnabled: "Enabled",
-            usageLocation: "Usage Location",
-            employeeId: "Employee ID",
-            employeeType: "Employee Type",
-            country: "Country",
-            officeLocation: "Office",
-            streetAddress: "Address",
-            id: "Object ID"
+            displayName: "Display Name", userPrincipalName: "User Principal Name", mail: "Email", mobile: "Mobile",
+            jobTitle: "Job Title", department: "Department", companyName: "Company", accountEnabled: "Enabled",
+            usageLocation: "Usage Location", employeeId: "Employee ID", employeeType: "Employee Type",
+            country: "Country", officeLocation: "Office", streetAddress: "Address", id: "Object ID"
         };
 
         let allUsers = [];
@@ -613,83 +586,82 @@
         let sortField = null;
         let sortDir = 1;
 
-        /* ============================================================
-           ICON + INIT HELPERS
-        ============================================================ */
+        /* ===========================
+           ICON POPULATION
+        ============================*/
         function populateStaticIcons() {
-            const set = (id, name) => {
-                const el = document.getElementById(id);
-                if (el) el.innerHTML = svg(name);
-            };
-            set("iconSearch", "search");
-            set("iconFilter", "filter");
-            set("iconColumns", "columns");
-            // detail user icon
-            const detailUserIcon = document.getElementById("detailUserIcon");
-            if (detailUserIcon) detailUserIcon.innerHTML = svg("user");
-            // close icons in drawers
-            document.querySelectorAll(".icon-close").forEach(span => span.innerHTML = svg("close"));
+            const set = (id, name) => { const el = document.getElementById(id); if (el) el.innerHTML = svg(name); };
+            set("iconSearch", "search"); set("iconFilter", "filter"); set("iconColumns", "columns"); set("detailUserIcon", "user");
+            document.querySelectorAll(".icon-close").forEach(s => s.innerHTML = svg("close"));
         }
 
-        /* ============================================================
-           MSAL: handle redirect result + robust getToken
-        ============================================================ */
-        // handle redirect responses (if any)
-        msalInstance.handleRedirectPromise().then((result) => {
-            // nothing obligatory to do here, but we ensure subsequent code will run
-            // console.log('handleRedirectPromise result', result);
-        }).catch(err => {
-            console.warn("handleRedirectPromise error", err);
-        });
+        /* ===========================
+           AUTH / BOOTSTRAP
+        ============================*/
+        // ensure redirect responses are processed before app logic
+        async function initializeAuth() {
+            try {
+                const redirectResult = await msalInstance.handleRedirectPromise();
+                if (redirectResult && redirectResult.account) {
+                    msalInstance.setActiveAccount(redirectResult.account);
+                } else {
+                    const accounts = msalInstance.getAllAccounts();
+                    if (accounts.length === 1) msalInstance.setActiveAccount(accounts[0]);
+                    // if multiple, you might prompt account selection - we take first
+                    else if (accounts.length > 1) msalInstance.setActiveAccount(accounts[0]);
+                }
+                // if no active account, redirect to login so we have a session
+                if (!msalInstance.getActiveAccount()) {
+                    // prefer redirect login to avoid popup blockers in embedded contexts
+                    await msalInstance.loginRedirect({ scopes });
+                    return false; // redirect will navigate away
+                }
+                return true;
+            } catch (err) {
+                console.error("initializeAuth error", err);
+                // try interactive fallback
+                try { await msalInstance.loginRedirect({ scopes }); return false; } catch (e) { console.error("loginRedirect failed", e); return false; }
+            }
+        }
 
         async function getToken() {
-            // prefer cached account
-            let account = msalInstance.getAllAccounts()[0];
-
+            const account = msalInstance.getActiveAccount();
             if (!account) {
-                try {
-                    // interactive login popup
-                    await msalInstance.loginPopup({ scopes });
-                    account = msalInstance.getAllAccounts()[0];
-                } catch (loginErr) {
-                    console.error("loginPopup failed", loginErr);
-                    // fallback to redirect - better UX: redirect only when popup not available
-                    msalInstance.loginRedirect({ scopes });
-                    return null;
-                }
+                // if no account, request redirect login
+                await msalInstance.loginRedirect({ scopes });
+                return null;
             }
 
             try {
                 const silent = await msalInstance.acquireTokenSilent({ scopes, account });
                 return silent.accessToken;
-            } catch (silentErr) {
-                console.warn("acquireTokenSilent failed, trying popup", silentErr);
+            } catch (err) {
+                console.warn("acquireTokenSilent failed, trying interactive fallback", err);
+                // if interaction required, use redirect fallback (safer than popup in many environments)
                 try {
-                    const pop = await msalInstance.acquireTokenPopup({ scopes, account });
-                    return pop.accessToken;
+                    const popup = await msalInstance.acquireTokenPopup({ scopes, account });
+                    return popup.accessToken;
                 } catch (popupErr) {
-                    console.error("acquireTokenPopup failed, falling back to redirect", popupErr);
+                    console.warn("acquireTokenPopup failed, falling back to redirect", popupErr);
                     try {
-                        // redirect will navigate away; return null to halt current flow
-                        msalInstance.acquireTokenRedirect({ scopes, account });
+                        await msalInstance.acquireTokenRedirect({ scopes, account });
                         return null;
-                    } catch (redirectErr) {
-                        console.error("acquireTokenRedirect failed", redirectErr);
+                    } catch (redErr) {
+                        console.error("acquireTokenRedirect failed", redErr);
                         return null;
                     }
                 }
             }
         }
 
-        /* ============================================================
+        /* ===========================
            GRAPH HELPERS
-        ============================================================ */
+        ============================*/
         async function fetchAllPages(url, token) {
             let items = [];
             while (url) {
                 const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
                 if (!res.ok) {
-                    // throw or return partial - surface error
                     const txt = await res.text();
                     throw new Error(`Graph fetch failed: ${res.status} ${txt}`);
                 }
@@ -702,10 +674,9 @@
 
         async function loadUsers() {
             const token = await getToken();
-            if (!token) return; // redirect or login in progress
+            if (!token) return; // redirect in progress
 
             const url = `https://graph.microsoft.com/v1.0/users?$select=${ALL_FIELDS.join(",")}`;
-
             try {
                 allUsers = await fetchAllPages(url, token);
             } catch (err) {
@@ -718,87 +689,57 @@
             populateColumnDrawer();
         }
 
-        /* ============================================================
-           TABLE RENDERING
-        ============================================================ */
+        /* ===========================
+           RENDER / TABLE
+        ============================*/
         function renderTable(data) {
-            const head = document.getElementById("tableHead");
-            const body = document.getElementById("tableBody");
+            const head = document.getElementById("tableHead"), body = document.getElementById("tableBody");
             if (!head || !body) return;
-
-            head.innerHTML = `<tr>
-        ${visibleColumns.map(c => `<th onclick="sortBy('${c}')">${FRIENDLY[c] ?? c} ${sortField === c ? (sortDir === 1 ? "▲" : "▼") : ""}</th>`).join("")}
-      </tr>`;
-
-            body.innerHTML = data.map(u => `<tr onclick="openUserDetails('${u.id}')">
-        ${visibleColumns.map(f => formatCell(f, u)).join("")}
-      </tr>`).join("");
+            head.innerHTML = `<tr>${visibleColumns.map(c => `<th onclick="sortBy('${c}')">${escapeHtml(FRIENDLY[c] ?? c)} ${sortField === c ? (sortDir === 1 ? "▲" : "▼") : ""}</th>`).join("")}</tr>`;
+            body.innerHTML = (data || []).map(u => `<tr onclick="openUserDetails('${escapeHtml(u.id || "")}')">${visibleColumns.map(f => formatCell(f, u)).join("")}</tr>`).join("");
         }
 
         function formatCell(field, user) {
-            let val = user[field] ?? "";
+            let val = user?.[field] ?? "";
             if (field === "accountEnabled") {
                 return `<td><span class="badge ${val ? "active" : "disabled"}">${val ? "Active" : "Disabled"}</span></td>`;
             }
             return `<td>${escapeHtml(String(val))}</td>`;
         }
 
-        // simple escaping for cell output
         function escapeHtml(str) {
-            return str.replace(/[&<>"'`=\/]/g, function (s) {
-                return ({
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#39;',
-                    '`': '&#96;',
-                    '=': '&#61;',
-                    '/': '&#47;'
-                })[s];
-            });
+            return (str || "").replace(/[&<>"'`=\/]/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;', '=': '&#61;', '/': '&#47;' })[s]);
         }
 
-        /* ============================================================
-           SORTING
-        ============================================================ */
+        /* ===========================
+           SORT
+        ============================*/
         function sortBy(field) {
-            if (sortField === field) sortDir *= -1;
-            else {
-                sortField = field;
-                sortDir = 1;
-            }
-
-            const sorted = [...allUsers].sort((a, b) => {
-                const x = ((a[field] ?? "") + "").toString().toLowerCase();
-                const y = ((b[field] ?? "") + "").toString().toLowerCase();
-                if (x > y) return sortDir;
-                if (x < y) return -sortDir;
-                return 0;
+            if (sortField === field) sortDir *= -1; else { sortField = field; sortDir = 1; }
+            const sorted = [...(allUsers || [])].sort((a, b) => {
+                const x = ((a[field] ?? "") + "").toLowerCase();
+                const y = ((b[field] ?? "") + "").toLowerCase();
+                if (x > y) return sortDir; if (x < y) return -sortDir; return 0;
             });
-
             renderTable(sorted);
         }
 
-        /* ============================================================
+        /* ===========================
            SEARCH + FILTERS
-        ============================================================ */
+        ============================*/
         function applySearchAndFilters() {
             const search = (document.getElementById("searchInput")?.value || "").toLowerCase();
-
-            const data = allUsers.filter(u => {
+            const data = (allUsers || []).filter(u => {
                 const text = Object.values(u || {}).join(" ").toLowerCase();
                 if (!text.includes(search)) return false;
                 return activeFilters.every(f => applyFilter(u, f));
             });
-
             renderTable(data);
         }
 
         function applyFilter(user, f) {
-            const val = ((user[f.field] ?? "") + "").toString().toLowerCase();
+            const val = ((user?.[f.field] ?? "") + "").toLowerCase();
             const needle = (f.value || "").toLowerCase();
-
             switch (f.op) {
                 case "contains": return val.includes(needle);
                 case "equals": return val === needle;
@@ -806,44 +747,101 @@
                 case "ends": return val.endsWith(needle);
                 case "empty": return val === "";
                 case "notempty": return val !== "";
-                case "true": return val === "true";
-                case "false": return val === "false";
                 default: return true;
             }
         }
 
-        /* ============================================================
-           FILTER DRAWER LOGIC
-        ============================================================ */
+        /* ===========================
+           FILTER DRAWER LOGIC (add/edit/remove)
+        ============================*/
         function populateFilterFields() {
             const sel = document.getElementById("filterFieldSelector");
             if (!sel) return;
-            sel.innerHTML = ALL_FIELDS.map(f => `<option value="${f}">${FRIENDLY[f] ?? f}</option>`).join("");
+            sel.innerHTML = ALL_FIELDS.map(f => `<option value="${f}">${escapeHtml(FRIENDLY[f] ?? f)}</option>`).join("");
         }
 
         function addFilterCondition() {
             const field = document.getElementById("filterFieldSelector")?.value;
+            const op = document.getElementById("filterOperator")?.value;
+            const value = (document.getElementById("filterValue")?.value || "").trim();
+
             if (!field) return;
-            activeFilters.push({ field, op: "contains", value: "" });
+            // allow empty for empty/notempty
+            if (op !== "empty" && op !== "notempty" && value === "") {
+                // don't add empty value filters except empty/notempty
+                alert("Please provide a value for this filter (or choose 'is empty'/'is not empty').");
+                return;
+            }
+
+            activeFilters.push({ field, op, value });
             redrawActiveFilters();
+            applySearchAndFilters();
         }
 
         function redrawActiveFilters() {
             const wrap = document.getElementById("activeFilters");
             if (!wrap) return;
-
             wrap.innerHTML = activeFilters.map((f, idx) => `
-        <div class="chip">
-          ${escapeHtml(FRIENDLY[f.field] ?? f.field)}: ${escapeHtml(f.op)} "${escapeHtml(f.value || "")}"
-          <button onclick="removeFilter(${idx})">✖</button>
+        <div class="chip" id="chip-${idx}">
+          <span style="font-weight:600">${escapeHtml(FRIENDLY[f.field] ?? f.field)}</span>
+          <span>:</span>
+          <span>${escapeHtml(f.op)}</span>
+          <span>"${escapeHtml(f.value || "")}"</span>
+          <button class="muted-btn" onclick="editFilter(${idx})">Edit</button>
+          <button class="muted-btn" onclick="removeFilter(${idx})">Remove</button>
         </div>
       `).join("");
         }
 
         function removeFilter(i) {
+            if (i < 0 || i >= activeFilters.length) return;
             activeFilters.splice(i, 1);
             redrawActiveFilters();
             applySearchAndFilters();
+        }
+
+        // when editing, replace chip with inline editor
+        function editFilter(idx) {
+            const f = activeFilters[idx];
+            if (!f) return;
+            const container = document.getElementById(`chip-${idx}`);
+            if (!container) return;
+            container.innerHTML = `
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="editField-${idx}" style="min-width:160px;">
+            ${ALL_FIELDS.map(ff => `<option value="${ff}" ${ff === f.field ? 'selected' : ''}>${escapeHtml(FRIENDLY[ff] ?? ff)}</option>`).join("")}
+          </select>
+          <select id="editOp-${idx}" style="min-width:140px;">
+            <option value="contains" ${f.op === 'contains' ? 'selected' : ''}>contains</option>
+            <option value="equals" ${f.op === 'equals' ? 'selected' : ''}>equals</option>
+            <option value="starts" ${f.op === 'starts' ? 'selected' : ''}>starts with</option>
+            <option value="ends" ${f.op === 'ends' ? 'selected' : ''}>ends with</option>
+            <option value="empty" ${f.op === 'empty' ? 'selected' : ''}>is empty</option>
+            <option value="notempty" ${f.op === 'notempty' ? 'selected' : ''}>is not empty</option>
+          </select>
+          <input id="editVal-${idx}" value="${escapeHtml(f.value || '')}" placeholder="value"/>
+          <button class="btn" onclick="saveEditedFilter(${idx})">Save</button>
+          <button class="btn ghost" onclick="cancelEdit(${idx})">Cancel</button>
+        </div>
+      `;
+        }
+
+        function saveEditedFilter(idx) {
+            const field = document.getElementById(`editField-${idx}`)?.value;
+            const op = document.getElementById(`editOp-${idx}`)?.value;
+            const value = (document.getElementById(`editVal-${idx}`)?.value || "").trim();
+            if (!field) return;
+            if (op !== "empty" && op !== "notempty" && value === "") {
+                alert("Please provide a value for this filter (or choose empty/notempty).");
+                return;
+            }
+            activeFilters[idx] = { field, op, value };
+            redrawActiveFilters();
+            applySearchAndFilters();
+        }
+
+        function cancelEdit(idx) {
+            redrawActiveFilters();
         }
 
         function applyFilters() {
@@ -851,110 +849,90 @@
             closeFilterDrawer();
         }
 
-        function openFilterDrawer() {
-            document.getElementById("filterDrawer")?.classList.add("open");
-        }
-        function closeFilterDrawer() {
-            document.getElementById("filterDrawer")?.classList.remove("open");
-        }
-
-        /* ============================================================
-           COLUMN DRAWER LOGIC
-        ============================================================ */
+        /* ===========================
+           COLUMN DRAWER
+        ============================*/
         function populateColumnDrawer() {
             const wrap = document.getElementById("columnList");
             if (!wrap) return;
-
             wrap.innerHTML = ALL_FIELDS.map(f => `
-        <label class="toggle" style="display:block;padding:6px 0;">
-          <input type="checkbox" ${visibleColumns.includes(f) ? "checked" : ""} onchange="toggleColumn('${f}', this.checked)">
+        <label style="display:block;padding:6px 0;">
+          <input type="checkbox" ${visibleColumns.includes(f) ? "checked" : ""} onchange="toggleColumn('${f}', this.checked)" />
           ${escapeHtml(FRIENDLY[f] ?? f)}
         </label>
       `).join("");
         }
 
         function toggleColumn(field, show) {
-            if (show) {
-                if (!visibleColumns.includes(field)) visibleColumns.push(field);
-            } else {
-                visibleColumns = visibleColumns.filter(f => f !== field);
-            }
+            if (show) { if (!visibleColumns.includes(field)) visibleColumns.push(field); }
+            else visibleColumns = visibleColumns.filter(f => f !== field);
         }
 
-        function saveColumnSelection() {
-            closeColumnDrawer();
-            renderTable(allUsers);
-        }
+        function saveColumnSelection() { closeColumnDrawer(); renderTable(allUsers); }
 
-        function openColumnDrawer() {
-            populateColumnDrawer();
-            document.getElementById("columnDrawer")?.classList.add("open");
-        }
-        function closeColumnDrawer() {
-            document.getElementById("columnDrawer")?.classList.remove("open");
-        }
-
-        /* ============================================================
-           USER DETAIL DRAWER
-        ============================================================ */
+        /* ===========================
+           DETAIL DRAWER
+        ============================*/
         async function openUserDetails(id) {
+            if (!id) return;
             const token = await getToken();
             if (!token) return;
-
-            const res = await fetch(`https://graph.microsoft.com/v1.0/users/${id}?$select=${ALL_FIELDS.join(",")}`, { headers: { Authorization: `Bearer ${token}` } });
-            if (!res.ok) {
-                console.error("Failed to fetch user", res.status);
-                return;
-            }
-            const user = await res.json();
-            renderUserDetails(user);
-            document.getElementById("detailDrawer")?.classList.add("open");
+            try {
+                const res = await fetch(`https://graph.microsoft.com/v1.0/users/${encodeURIComponent(id)}?$select=${ALL_FIELDS.join(",")}`, { headers: { Authorization: `Bearer ${token}` } });
+                if (!res.ok) { console.error("Failed to fetch user", res.status); return; }
+                const user = await res.json();
+                renderUserDetails(user);
+                document.getElementById("detailDrawer")?.classList.add("open");
+            } catch (e) { console.error("openUserDetails error", e); }
         }
 
         function renderUserDetails(u) {
             const wrap = document.getElementById("detailContent");
             if (!wrap) return;
-
             wrap.innerHTML = ALL_FIELDS.map(f => `
         <div class="detail-row">
           <div class="label">${escapeHtml(FRIENDLY[f] ?? f)}</div>
-          <div class="value">${escapeHtml((u[f] ?? "") + "")}</div>
+          <div class="value">${escapeHtml((u?.[f] ?? "") + "")}</div>
         </div>
       `).join("");
         }
 
-        function closeDetailDrawer() {
-            document.getElementById("detailDrawer")?.classList.remove("open");
-        }
+        function closeDetailDrawer() { document.getElementById("detailDrawer")?.classList.remove("open"); }
 
-        /* ============================================================
+        /* ===========================
+           DRAWER OPEN/CLOSE
+        ============================*/
+        function openFilterDrawer() { document.getElementById("filterDrawer")?.classList.add("open"); }
+        function closeFilterDrawer() { document.getElementById("filterDrawer")?.classList.remove("open"); }
+        function openColumnDrawer() { document.getElementById("columnDrawer")?.classList.add("open"); populateColumnDrawer(); }
+        function closeColumnDrawer() { document.getElementById("columnDrawer")?.classList.remove("open"); }
+
+        /* ===========================
            EVENT BINDINGS + INIT
-        ============================================================ */
+        ============================*/
         document.getElementById("searchInput")?.addEventListener("input", applySearchAndFilters);
         document.getElementById("openFilter").onclick = openFilterDrawer;
         document.getElementById("openColumns").onclick = openColumnDrawer;
         document.getElementById("resetAll").onclick = () => {
-            document.getElementById("searchInput").value = "";
+            const si = document.getElementById("searchInput");
+            if (si) si.value = "";
             activeFilters = [];
             redrawActiveFilters();
             renderTable(allUsers);
         };
 
-        // close drawer buttons (delegated for all drawer close icons)
-        document.addEventListener("click", (e) => {
-            const el = e.target;
-            if (el && el.classList && el.classList.contains('btn-close')) closeFilterDrawer();
-        });
-
-        // populate icons and then start the auth+load flow
+        // init on DOM ready
         document.addEventListener("DOMContentLoaded", async () => {
             populateStaticIcons();
-
-            // start auth + load users
-            await loadUsers();
+            populateFilterFields();
+            // initialize auth, then load data
+            const ok = await initializeAuth();
+            if (ok) {
+                // do not await here if you want faster UI, but we await to ensure token available
+                await loadUsers();
+            }
         });
     </script>
-
 </body>
 
 </html>
