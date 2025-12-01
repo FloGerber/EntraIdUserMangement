@@ -540,17 +540,7 @@ function renderUserDetailsPanel(user, categorized, licenseDisplay, dirRoles) {
 /* ========================
    Drawer open/close helpers
    ======================== */
-function closeDetailDrawer() {
-    const drawer = document.getElementById("detailDrawer");
-    if (!drawer) return;
-
-    drawer.style.transform = "translateX(100%)";
-
-    // Remove state after animation
-    setTimeout(() => {
-        drawer.classList.remove("open");
-    }, 300);
-}
+function closeDetailDrawer() { document.getElementById("detailDrawer")?.classList.remove("open"); }
 function openFilterDrawer() { document.getElementById("filterDrawer")?.classList.add("open"); }
 function closeFilterDrawer() { document.getElementById("filterDrawer")?.classList.remove("open"); }
 function openColumnDrawer() { document.getElementById("columnDrawer")?.classList.add("open"); populateColumnDrawer(); }
