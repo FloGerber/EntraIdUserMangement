@@ -672,6 +672,16 @@
             return items;
         }
 
+        async function loadUserGroups(userId, token) {
+            const url = `https://graph.microsoft.com/v1.0/users/${userId}/memberOf?$select=id,displayName`;
+            return await fetchAllPages(url, token);
+        }
+
+        async function loadUserLicenses(userId, token) {
+            const url = `https://graph.microsoft.com/v1.0/users/${userId}/licenseDetails`;
+            return await fetchAllPages(url, token);
+        }
+
         async function loadUsers() {
             const token = await getToken();
             if (!token) return; // redirect in progress
@@ -874,28 +884,56 @@
            DETAIL DRAWER
         ============================*/
         async function openUserDetails(id) {
-            if (!id) return;
+            const drawer = document.getElementById("detailDrawer");
+            const detailContent = document.getElementById("detailContent");
+            const user = allUsers.find(u => u.id === id);
+            if (!user) return;
+
+            drawer.classList.add("open");
+            drawer.setAttribute("aria-hidden", "false");
+
             const token = await getToken();
             if (!token) return;
-            try {
-                const res = await fetch(`https://graph.microsoft.com/v1.0/users/${encodeURIComponent(id)}?$select=${ALL_FIELDS.join(",")}`, { headers: { Authorization: `Bearer ${token}` } });
-                if (!res.ok) { console.error("Failed to fetch user", res.status); return; }
-                const user = await res.json();
-                renderUserDetails(user);
-                document.getElementById("detailDrawer")?.classList.add("open");
-            } catch (e) { console.error("openUserDetails error", e); }
+
+            // Fetch missing data
+            const [groups, licenses] = await Promise.all([
+                loadUserGroups(id, token),
+                loadUserLicenses(id, token)
+            ]);
+
+            const groupList = groups.map(g => `
+        <div class="chip">${escapeHtml(g.displayName || "Unknown group")}</div>
+    `).join("");
+
+            const licenseList = licenses.map(l => `
+        <div class="chip">${escapeHtml(l.skuPartNumber)} (${escapeHtml(l.skuId)})</div>
+    `).join("");
+
+            detailContent.innerHTML = `
+        <div class="detail-grid">
+            <div class="detail-card">
+                <h3>Basic Information</h3>
+                ${Object.entries(user).map(([k, v]) => `
+                    <div class="detail-row">
+                        <div class="k">${escapeHtml(FRIENDLY[k] || k)}</div>
+                        <div class="v">${escapeHtml(String(v || ""))}</div>
+                    </div>
+                `).join("")}
+            </div>
+
+            <div class="detail-card">
+                <h3>Group Memberships</h3>
+                <div class="chips">${groupList || "<span class='muted'>No groups</span>"}</div>
+            </div>
+
+            <div class="detail-card">
+                <h3>Assigned Licenses</h3>
+                <div class="chips">${licenseList || "<span class='muted'>No licenses</span>"}</div>
+            </div>
+        </div>
+    `;
         }
 
-        function renderUserDetails(u) {
-            const wrap = document.getElementById("detailContent");
-            if (!wrap) return;
-            wrap.innerHTML = ALL_FIELDS.map(f => `
-        <div class="detail-row">
-          <div class="label">${escapeHtml(FRIENDLY[f] ?? f)}</div>
-          <div class="value">${escapeHtml((u?.[f] ?? "") + "")}</div>
-        </div>
-      `).join("");
-        }
 
         function closeDetailDrawer() { document.getElementById("detailDrawer")?.classList.remove("open"); }
 
