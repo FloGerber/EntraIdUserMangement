@@ -277,7 +277,7 @@ table.user-table td {
     right: 0 !important;
     top: 0;
     height: 100%;
-    width: 920px;
+    width: 70%;
     max-width: calc(100% - 40px);
     background: linear-gradient(180deg, var(--panel), #262626);
     box-shadow: -20px 0 60px rgba(0, 0, 0, 0.7);
