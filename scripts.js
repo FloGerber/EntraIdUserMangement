@@ -394,6 +394,15 @@ async function openUserDetails(encodedId) {
         return;
     }
 
+    // Log current class list
+    console.log("Drawer classes after update:", drawer.className);
+
+    // Check computed style
+    const style = window.getComputedStyle(drawer);
+    console.log("Drawer transform:", style.transform);
+
+    const id = decodeURIComponent(encodedId || '');
+
 
 
     console.log("Opening detail drawer, id:", id);
@@ -405,14 +414,8 @@ async function openUserDetails(encodedId) {
 
 
 
-    // Log current class list
-    console.log("Drawer classes after update:", drawer.className);
 
-    // Check computed style
-    const style = window.getComputedStyle(drawer);
-    console.log("Drawer transform:", style.transform);
 
-    const id = decodeURIComponent(encodedId || '');
 
     console.log("Adding open class to drawer...");
 
