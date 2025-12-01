@@ -386,7 +386,6 @@ function openDetailSkeleton(title, subtitle) {
 
 async function openUserDetails(encodedId) {
 
-
     console.log("Attempting to open detail drawer...");
     const drawer = document.getElementById("detailDrawer");
 
@@ -395,10 +394,6 @@ async function openUserDetails(encodedId) {
         return;
     }
 
-    // Force the class
-    drawer.classList.add("open");
-    drawer.style.transform = "";
-
     // Log current class list
     console.log("Drawer classes after update:", drawer.className);
 
@@ -406,13 +401,9 @@ async function openUserDetails(encodedId) {
     const style = window.getComputedStyle(drawer);
     console.log("Drawer transform:", style.transform);
 
-
     const id = decodeURIComponent(encodedId || '');
 
     console.log("Adding open class to drawer...");
-    // const drawer = document.getElementById("detailDrawer");
-    // console.log("Drawer element:", drawer);
-    // drawer?.classList.add("open");
 
     if (!id) return;
     // show skeleton immediately and open drawer
