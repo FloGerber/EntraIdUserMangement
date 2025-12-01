@@ -294,8 +294,6 @@ table.user-table td {
     transform: translateX(0) !important;
 }
 
-
-
 /* Sticky header inside detail drawer */
 .detail-header {
     position: sticky;
@@ -470,8 +468,4 @@ input {
     background: var(--muted-panel);
     border: 1px solid var(--divider);
     color: var(--text-secondary)
-}
-
-#detailDrawer.detail-drawer.open {
-    transform: translateX(0) !important;
 }

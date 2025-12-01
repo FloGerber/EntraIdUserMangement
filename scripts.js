@@ -18,7 +18,7 @@ const msalInstance = new msal.PublicClientApplication(msalConfig);
    ======================== */
 const BASE_FIELDS = ["displayName", "userPrincipalName", "mail", "mobile", "accountEnabled"];
 const EXTRA_FIELDS = ["jobTitle", "department", "companyName", "usageLocation", "employeeId", "employeeType", "country", "officeLocation", "streetAddress", "id"];
-const ALL_FIELDS = [...BASE_FIELDS, ...EXTRA_FIELDS];
+const ALL_FIELDS = [...BASE_FIELDS, ...EXTRA_FIELDS, "id"];
 
 const FRIENDLY = {
     displayName: "Display Name", userPrincipalName: "User Principal Name", mail: "Email", mobile: "Mobile",
@@ -393,6 +393,17 @@ async function openUserDetails(encodedId) {
         console.error("Drawer element not found!");
         return;
     }
+
+
+
+    console.log("Opening detail drawer, id:", id);
+    console.log("Drawer before classList:", drawer.className);
+    drawer.classList.add("open");
+
+    console.log("Drawer after classList:", drawer.className);
+    console.log("Computed transform:", window.getComputedStyle(drawer).transform);
+
+
 
     // Log current class list
     console.log("Drawer classes after update:", drawer.className);
